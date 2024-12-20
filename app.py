@@ -5,22 +5,25 @@ import dateutil.relativedelta
 import requests
 import logging
 import os
+from dotenv import load_dotenv
 
 app = Flask(__name__)
+app.logger.setLevel(logging.INFO)
 
-user = os.environ.get('MYSQL_USER')     # ユーザ名
-password = os.environ.get('MYSQL_PASSWORD') # パスワード
+load_dotenv()
+
+user = os.getenv('MYSQL_USER')     # ユーザ名
+password = os.getenv('MYSQL_PASSWORD') # パスワード
 host = 'mysql_container'    # ホスト名 or IP
-dbname = os.environ.get('MYSQL_DATABASE')       # データベース
+dbname = os.getenv('MYSQL_DATABASE')       # データベース
 port = 3306           # ポート
 url = f'mysql+pymysql://{user}:{password}@{host}:{port}/{dbname}?charset=utf8'
-print(url)
 app.config['SQLALCHEMY_DATABASE_URI'] = url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # OpenWeatherMap設定
-OPENWEATHER_API_KEY = os.environ.get('OPENWEATHER_API_KEY') 
+OPENWEATHER_API_KEY = os.getenv('OPENWEATHER_API_KEY') 
 DEFAULT_CITY = "Osaka"
 WEATHER_CACHE = {}
 CACHE_DURATION = timedelta(hours=1)  # キャッシュの有効期間
