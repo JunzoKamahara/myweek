@@ -1,0 +1,69 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>週間スケジュール</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>週間スケジュール</h1>
+        
+        <div class="schedule-controls">
+            <a href="{{ url_for('index', week_offset=week_offset-1) }}" class="nav-button">← 前の週</a>
+            
+            {% if week_offset == 0 %}
+                <span class="current-week">今週</span>
+            {% else %}
+                <a href="{{ url_for('index') }}" class="nav-button">今週に戻る</a>
+            {% endif %}
+            
+            <a href="{{ url_for('index', week_offset=week_offset+1) }}" class="nav-button">次の週 →</a>
+        </div>
+
+        <a href="{{ url_for('add_schedule') }}" class="add-button">+ スケジュールを追加</a>
+        
+        <div class="week-schedule">
+            {% set day_names = ['月', '火', '水', '木', '金', '土', '日'] %}
+            {% for date, schedules in weekly_schedules.items() %}
+            {% set weekday = (loop.index0 + start_of_week.weekday()) % 7 %}
+            <div class="day-column">
+                <h2>{{ date }} ({{ day_names[weekday] }})</h2>
+                {% if weather_forecast and date in weather_forecast %}
+                    <div class="weather-info">
+                        {% for hour, weather in weather_forecast[date].items() %}
+                            <div class="weather-hour">
+                                <p class="hour">{{ hour }}</p>
+                                <img src="http://openweathermap.org/img/w/{{ weather['icon'] }}.png" 
+                                     alt="weather icon">
+                                <p>{{ weather['temp'] }}℃</p>
+                                <p>{{ weather['weather'] }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                {% if schedules %}
+                    {% for schedule in schedules %}
+                    <div class="schedule-item">
+                        <h3>{{ schedule.title }}</h3>
+                        {% if schedule.start_time and schedule.end_time %}
+                            <p>{{ schedule.start_time.strftime('%H:%M') }} - {{ schedule.end_time.strftime('%H:%M') }}</p>
+                        {% endif %}
+                        {% if schedule.description %}
+                            <p>{{ schedule.description }}</p>
+                        {% endif %}
+                        <form action="{{ url_for('delete_schedule', schedule_id=schedule.id) }}" method="post" class="delete-form">
+                            <button type="submit" onclick="return confirm('本当に削除しますか？');">削除</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>スケジュールはありません</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
