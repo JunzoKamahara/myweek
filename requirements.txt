@@ -4,3 +4,5 @@ pymysql
 python-dateutil
 requests
 python-dotenv
+flask-login
+flask-dance
